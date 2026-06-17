@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>㈜장수플랜트 - kiscon 업체별 공사현황 비교</title>
+<style>
+  :root{
+    --blue:#185FA5; --blue-dark:#0C447C; --blue-light:#E6F1FB;
+    --green:#3B6D11; --green-dark:#27500A; --green-light:#EAF3DE; --green-border:#C0DD97;
+    --red:#A32D2D; --red-light:#FCEBEB;
+    --gray-bg:#F7F6F3; --gray-border:#E5E3DD; --gray-text2:#6B6A65; --gray-text3:#9C9A93;
+    --text:#2B2A27;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;background:var(--gray-bg);color:var(--text);line-height:1.5}
+  .container{max-width:980px;margin:0 auto;padding:1.5rem 1rem 4rem}
+  header{margin-bottom:1.25rem}
+  header h1{font-size:18px;font-weight:600}
+  header p{font-size:13px;color:var(--gray-text2);margin-top:2px}
+  .section{background:#fff;border:1px solid var(--gray-border);border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 2px rgba(0,0,0,.02)}
+  .sec-title{font-size:13px;font-weight:600;color:var(--gray-text2);margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+  .toolbar{display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+  .company-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+  .cb{background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;text-align:left;color:var(--text);transition:.15s;position:relative}
+  .cb:hover{border-color:#c8c6bf}
+  .cb.active{border:1.5px solid var(--blue);background:var(--blue-light);color:var(--blue-dark)}
+  .cb .rep{font-size:11px;color:var(--gray-text3);margin-top:2px}
+  .cb.active .rep{color:var(--blue)}
+  .cb .badge{position:absolute;top:6px;right:8px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:20px}
+  .badge-done{background:var(--green-light);color:var(--green)}
+  .badge-new{background:var(--red-light);color:var(--red);font-weight:700}
+  .badge-week{background:#EEF0FF;color:#4338CA;font-size:9px}
+  .progress-bar{height:6px;background:var(--gray-bg);border-radius:3px;margin-bottom:.6rem;overflow:hidden}
+  .progress-fill{height:100%;background:var(--blue);border-radius:3px;transition:.3s}
+  .sel-name{font-size:15px;font-weight:600;margin-bottom:.75rem}
+  .paste-area{width:100%;min-height:140px;border:1px solid var(--gray-border);border-radius:8px;padding:10px 12px;font-size:12px;font-family:"SF Mono",Consolas,monospace;color:var(--text);background:#fff;resize:vertical;line-height:1.6}
+  .paste-area:focus{outline:none;border-color:var(--blue)}
+  .paste-area::placeholder{color:var(--gray-text3);font-family:inherit;font-size:13px}
+  .hint{font-size:12px;color:var(--gray-text3);margin-top:5px;line-height:1.6}
+  .btn-row{display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap;align-items:center}
+  button.act{border:1px solid #d8d6cf;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;background:#fff;color:var(--text);transition:.15s;display:inline-flex;align-items:center;gap:6px;font-weight:500}
+  button.act:hover{background:var(--gray-bg)}
+  button.act:active{transform:scale(.98)}
+  button.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+  button.blue:hover{background:var(--blue-dark)}
+  button.green{background:var(--green);border-color:var(--green);color:#fff}
+  button.green:hover{background:var(--green-dark)}
+  button.green:disabled{background:#c4c2ba;border-color:#c4c2ba;cursor:not-allowed}
+  button.outline-red{color:var(--red);border-color:#e8b9b9}
+  button.outline-red:hover{background:var(--red-light)}
+  button.small{padding:5px 10px;font-size:12px}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .tag-new{background:var(--green-light);color:var(--green)}
+  .tag-del{background:var(--red-light);color:var(--red)}
+  .tag-keep{background:#F1EFE8;color:var(--gray-text2)}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:.5rem}
+  th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--gray-border);font-weight:600;color:var(--gray-text2);font-size:12px;white-space:nowrap}
+  td{padding:8px 10px;border-bottom:1px solid var(--gray-border);color:var(--text);vertical-align:top;line-height:1.5}
+  tr.new-row td{background:var(--green-light)}
+  tr.del-row td{background:var(--red-light);color:var(--gray-text3);text-decoration:line-through}
+  .scards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+  .sc{background:var(--gray-bg);border-radius:8px;padding:.75rem 1rem;text-align:center}
+  .sc .num{font-size:22px;font-weight:700}
+  .sc .lbl{font-size:12px;color:var(--gray-text2);margin-top:2px}
+  .num-n{color:var(--green)}.num-d{color:var(--red)}.num-k{color:var(--gray-text2)}
+  .summary-box{background:var(--green-light);border:1px solid var(--green-border);border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--green);font-weight:600}
+  .empty{color:var(--gray-text3);font-size:13px;padding:1.5rem 0;text-align:center}
+  .preview-box{background:var(--gray-bg);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;color:var(--gray-text2);line-height:1.9;display:none;max-height:300px;overflow-y:auto}
+  .preview-box.show{display:block}
+  .gubun-toggle{display:inline-flex;border:1px solid var(--gray-border);border-radius:6px;overflow:hidden}
+  .gubun-toggle button{border:none;background:#fff;padding:4px 9px;font-size:11px;cursor:pointer;color:var(--gray-text2);font-weight:500}
+  .gubun-toggle button.on-원{background:var(--blue);color:#fff}
+  .gubun-toggle button.on-하{background:#7C4D9C;color:#fff}
+  .gubun-toggle button:not(:last-child){border-right:1px solid var(--gray-border)}
+  .save-status{font-size:11px;color:var(--gray-text3);display:flex;align-items:center;gap:4px}
+  .save-status.saved{color:var(--green)}
+  .week-label{display:inline-flex;align-items:center;gap:5px;background:var(--blue-light);color:var(--blue-dark);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem}
+  .modal-overlay.show{display:flex}
+  .modal{background:#fff;border-radius:12px;padding:1.5rem;max-width:380px;width:100%}
+  .modal h3{font-size:15px;margin-bottom:.5rem}
+  .modal p{font-size:13px;color:var(--gray-text2);margin-bottom:1rem;line-height:1.6}
+  .modal .btn-row{justify-content:flex-end}
+  textarea#importArea{width:100%;min-height:100px;font-family:monospace;font-size:11px;border:1px solid var(--gray-border);border-radius:6px;padding:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>kiscon 업체별 공사현황 비교 도구</h1>
+    <p>㈜장수플랜트 · 매주 신규 공사 현황 추적 및 보고서 생성</p>
+  </header>
+
+  <div class="section">
+    <div class="sec-title">
+      <span>📋 업체 선택</span>
+      <span id="weekBadge" class="week-label" style="margin-left:auto"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+      <span style="font-size:12px;color:var(--gray-text3)" id="progTxt"></span>
+      <div style="display:flex;gap:6px">
+        <button class="act small" onclick="openManageModal()">⚙ 업체 관리</button>
+        <button class="act small outline-red" onclick="confirmResetWeek()">🔄 새 주차 시작</button>
+      </div>
+    </div>
+    <div class="company-grid" id="companyGrid"></div>
+  </div>
+
+  <div class="section" id="inputSec" style="display:none">
+    <div class="sel-name" id="selName"></div>
+    <div class="sec-title">📥 kiscon 조회 결과 붙여넣기</div>
+    <textarea class="paste-area" id="pasteArea" placeholder="kiscon에서 표 전체를 드래그 선택 후 Ctrl+C → 여기에 Ctrl+V"></textarea>
+    <div class="preview-box" id="previewBox"></div>
+    <p class="hint">* 붙여넣으면 인식된 공사명이 바로 보입니다. 확인 후 비교 실행하세요.</p>
+    <div class="btn-row">
+      <button class="act blue" onclick="runCompare()">⇄ 비교 실행</button>
+      <button class="act" onclick="clearInput()">✕ 초기화</button>
+    </div>
+  </div>
+
+  <div class="section" id="resultSec" style="display:none">
+    <div class="sec-title">📊 비교 결과</div>
+    <div class="scards">
+      <div class="sc"><div class="num num-n" id="cntN">0</div><div class="lbl">★ 신규 추가</div></div>
+      <div class="sc"><div class="num num-d" id="cntD">0</div><div class="lbl">삭제 (밀려남)</div></div>
+      <div class="sc"><div class="num num-k" id="cntK">0</div><div class="lbl">유지</div></div>
+    </div>
+    <div id="resultTbl"></div>
+    <div class="btn-row">
+      <button class="act" onclick="showNext()">다음 업체로 →</button>
+    </div>
+  </div>
+
+  <div class="section" id="reportSec">
+    <div class="sec-title">📑 보고서 - 신규 발생 업체 전체 현황 (이번 주)</div>
+    <div id="reportSummary" class="summary-box" style="display:none"></div>
+    <div id="reportTbl"><div class="empty">신규 공사가 있는 업체의 전체 현황이 여기에 모입니다.</div></div>
+    <div class="btn-row">
+      <button class="act green" id="dlBtn" onclick="downloadReport()" disabled>⬇ 보고용 엑셀 다운로드</button>
+      <span class="save-status saved" id="saveStatus">✓ 자동 저장됨</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-title">💾 데이터 백업 / 복원</div>
+    <p class="hint" style="margin-top:0;margin-bottom:.75rem">브라우저 데이터는 이 기기에만 저장됩니다. 다른 기기에서 이어서 작업하려면 백업 파일을 내려받아 옮기세요.</p>
+    <div class="btn-row">
+      <button class="act small" onclick="exportBackup()">⬇ 백업 파일 내려받기</button>
+      <button class="act small" onclick="document.getElementById('importFile').click()">⬆ 백업 파일 불러오기</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="manageModal">
+  <div class="modal">
+    <h3>업체 관리</h3>
+    <p>새 업체 추가, 기존 업체 삭제가 가능합니다.</p>
+    <div style="margin-bottom:.75rem">
+      <input id="newCompName" placeholder="업체명" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:6px;font-size:13px;margin-bottom:6px">
+      <input id="newCompRep" placeholder="대표자명" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:6px;font-size:13px">
+    </div>
+    <div class="btn-row">
+      <button class="act blue small" onclick="addCompany()">+ 추가</button>
+      <button class="act small" onclick="closeManageModal()">닫기</button>
+    </div>
+    <hr style="margin:1rem 0;border:none;border-top:1px solid var(--gray-border)">
+    <div id="manageList" style="max-height:200px;overflow-y:auto;font-size:13px"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">확인</h3>
+    <p id="confirmMsg"></p>
+    <div class="btn-row">
+      <button class="act small" onclick="closeConfirm()">취소</button>
+      <button class="act outline-red small" id="confirmBtn">확인</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script>
+/* ============================================================
+   초기 시드 데이터 (최초 실행 시에만 사용, 이후엔 localStorage 우선)
+   ============================================================ */
+const SEED_COMPANIES = [
+  {name:"다대종합건설㈜",rep:"최문수",list:[
+    {n:"평택교육지원청 청사 이전 사업",d:"2026-04-16",p:"경기도평택교육지원청",g:"원도급"},
+    {n:"(주)조이트론 북양리514-17 공장 신축공사",d:"2026-03-03",p:"(주)조이트론",g:"원도급"},
+    {n:"경기도 용인시 처인구 남사읍 아곡리 564-1외 4필지 창고시설 재축공사",d:"2026-01-09",p:"김선권",g:"원도급"},
+    {n:"(주)에버스틸 화리현리232-3외2필지 공장 신축공사",d:"2025-11-20",p:"(주)에버스틸",g:"원도급"},
+    {n:"오산 세교프라자 근생 11-1-2블럭 신축공사",d:"2025-08-19",p:"일원컴퍼니",g:"원도급"},
+    {n:"(주)진웅엔지니어링 공장 신축공사",d:"2025-07-09",p:"(주)진웅엔지니어링",g:"원도급"},
+    {n:"동오산업(주) 공장 증축공사",d:"2025-05-30",p:"동오산업㈜",g:"원도급"},
+    {n:"오산 세교프라자 근생 11-2-1블럭 신축공사",d:"2025-01-21",p:"엠에스디앤씨㈜",g:"원도급"},
+    {n:"수원중학교 본관동 장애인용 승강기 설치 공사",d:"2024-11-12",p:"경기도수원교육청 수원중학교",g:"원도급"},
+    {n:"화성시 남양읍 장덕리 850-10번지 근생시설 신축공사",d:"2024-03-20",p:"진영하우징㈜",g:"원도급"}
+  ]},
+  {name:"㈜대혜건축",rep:"권성우,조윤상,권혜민",list:[
+    {n:"인천부평 행복주택 및 도시재생뉴딜 혁신센터 건설공사중 경량벽체공사",d:"2026-05-20",p:"한국토지주택공사 인천지역본부",g:"하도급"},
+    {n:"마포로 3-1지구 주상복합 신축공사중 경량콘크리트판넬공사",d:"2026-04-15",p:"(주)인사이트투",g:"하도급"},
+    {n:"현대)양재사옥 동관 8층 출장자라운지 및 스마트오피스 조성 인테리어공사",d:"2026-04-08",p:"현대자동차㈜",g:"원도급"},
+    {n:"상삼리1번지 증축공사중 TEC 경량패널 설치공사",d:"2026-04-03",p:"(주)금수원",g:"하도급"},
+    {n:"서초동 JK TOWER 신축공사중 인테리어공사",d:"2026-04-01",p:"(주) 제이케이파트너스",g:"하도급"},
+    {n:"본관 지하층 락커룸 및 공용 WC 리뉴얼 공사의 건",d:"2026-03-26",p:"의료법인롯데의료재단",g:"원도급"},
+    {n:"[본점] 에비뉴엘(4F) 공용부 인테리어 공사件",d:"2026-02-25",p:"롯데쇼핑㈜",g:"원도급"},
+    {n:"고양 풍동2지구 A3-1,2BL 공동주택 신축공사중 축조(M/H)",d:"2026-02-23",p:"한국자산신탁㈜",g:"하도급"},
+    {n:"Tower107 사무실 인테리어 디자인 및 시공 중 인테리어공사",d:"2026-02-10",p:"자이에스앤디㈜",g:"원도급"},
+    {n:"아산신도시 3차 메가시티 견본주택 개보수공사",d:"2026-01-26",p:"주식회사 하늘이앤씨",g:"원도급"}
+  ]},
+  {name:"㈜동일인테리어",rep:"정종희",list:[
+    {n:"힐스테이트 선화 더와이즈 중 인테리어",d:"2026-06-02",p:"(주)와이즈클래스에이",g:"하도급"},
+    {n:"소사본1-1 M/H건립",d:"2026-06-01",p:"두산건설 주식회사",g:"원도급"},
+    {n:"제일건설 광주첨단3지구 견본주택 인테리어공사",d:"2026-05-29",p:"첨단678피에프브이 주식회사",g:"원도급"},
+    {n:"천안성정동511 견본주택 건립공사",d:"2026-05-29",p:"(주)대우건설",g:"원도급"},
+    {n:"대우건설 목동 홍보관 라운지 인테리어공사",d:"2026-05-18",p:"주식회사 하이투",g:"원도급"},
+    {n:"SK Korea House 2 Refurb project",d:"2026-05-07",p:"주한영국대사관",g:"원도급"},
+    {n:"압구정아파트지구 특별계획구역5 홍보관 인테리어 공사",d:"2026-04-30",p:"디엘이앤씨㈜",g:"원도급"},
+    {n:"아크로 여의도 더원 현장중 인테리어공사(커뮤니티, 로비)",d:"2026-04-24",p:"원트웬티파이브피에프브이 주식회사",g:"하도급"},
+    {n:"웨스틴 프로젝트 인테리어공사(3공구)",d:"2026-04-24",p:"파르나스호텔㈜",g:"원도급"},
+    {n:"이천대흥2지구 휴먼빌 아파트 견본주택 건립공사",d:"2026-04-23",p:"스페이스건설 주식회사",g:"원도급"}
+  ]},
+  {name:"㈜동화이앤씨",rep:"심우원, 심관식",list:[
+    {n:"군산항 제2준설토 투기장(1공구) 축조공사",d:"2026-04-24",p:"해양수산부 군산지방해양수산청",g:"원도급"},
+    {n:"부산항 진해신항 남측 방파호안(1단계 2공구) 축조공사",d:"2026-03-25",p:"해양수산부",g:"원도급"},
+    {n:"미호천 여천지구 등 2개소 하천정비사업 6차",d:"2026-03-13",p:"기후에너지환경부 금강유역환경청",g:"원도급"},
+    {n:"운정 메디폴리스병원 신축공사",d:"2026-02-23",p:"청운홀딩스",g:"원도급"},
+    {n:"매음지구 다목적농촌용수개발사업 토목·기계·건축공사",d:"2026-02-09",p:"한국농어촌공사 경기지역본부 강화옹진지",g:"원도급"},
+    {n:"인천남항 예부선 계류지 정비공사",d:"2026-01-22",p:"해양수산부 인천지방해양수산청",g:"원도급"},
+    {n:"고속국도 제29호선 세종~천안간 건설공사(제4공구)",d:"2026-01-12",p:"한국도로공사세종천안건설사업단",g:"원도급"},
+    {n:"상주시 폐기물매립시설 확장공사(총괄)",d:"2025-12-09",p:"경상북도 상주시",g:"원도급"},
+    {n:"당진 양곡 자동화 터미널 조성사업 (육상공사)",d:"2025-09-16",p:"㈜선광",g:"원도급"},
+    {n:"(주)소키씨앤티 공장 증축공사",d:"2025-06-30",p:"㈜소키씨앤티",g:"원도급"}
+  ]},
+  {name:"㈜엄지하우스",rep:"정재호, 정석환",list:[
+    {n:"한남동 카펠라서울클럽 보수 및 개선공사",d:"2026-06-05",p:"헌인하운개발 주식회사",g:"원도급"},
+    {n:"C주택 신축공사중 인테리어공사",d:"2026-05-18",p:"조정호",g:"하도급"},
+    {n:"서초 헌인마을 도시개발사업중 인테리어공사(4공구)",d:"2026-05-07",p:"(주)한국토지신탁",g:"하도급"},
+    {n:"로즈우드 서울(5F,7F,수공간) 아사야 스파 및 웰니스 인테리어공사",d:"2026-04-17",p:"용산일레븐주식회사",g:"원도급"},
+    {n:"대전 항공기술연구원 기숙사동 환경개선 공사",d:"2026-04-17",p:"(주)대한항공",g:"원도급"},
+    {n:"인천 송도 잭니클라우스 주택(64/65번지) 제2차 FF&E",d:"2026-01-23",p:"(주)대한항공",g:"원도급"},
+    {n:"한남730 시니어레지던스 홍보관 설계용역 및 도급공사",d:"2025-12-22",p:"(주)소요한남레지던스",g:"원도급"},
+    {n:"인천공항 T2 통합운송 사무공간 조성공사",d:"2025-12-12",p:"(주)대한항공",g:"원도급"},
+    {n:"[공사] 인문관 임시이전 등 공간재배치 공사",d:"2025-11-24",p:"서울교육대학교",g:"원도급"},
+    {n:"일진빌딩 지하1층 직원식당 PDR 리모델링공사",d:"2025-11-21",p:"일진디앤코 주식회사",g:"원도급"}
+  ]},
+  {name:"포르테라인",rep:"김영대",list:[
+    {n:"궁전맨션 수주홍보관 건립공사",d:"2026-06-04",p:"에이치에스화성 주식회사",g:"원도급"},
+    {n:"평택고덕 Abc-12BL 공동주택 신축공사중 모델하우스 건립",d:"2026-05-07",p:"현대건설 컨소시엄",g:"하도급"},
+    {n:"안산 성포동 주상복합 견본주택 신축공사",d:"2026-05-06",p:"화이트코리아 주식회사",g:"원도급"},
+    {n:"자이에스앤디 충정로역 주상복합 견본주택 개보수공사",d:"2026-04-15",p:"주식회사 이노디앤씨",g:"원도급"},
+    {n:"소사3구역 재개발정비사업중 모델하우스공사(건축)",d:"2026-03-18",p:"소사3구역재개발정비사업조합",g:"하도급"},
+    {n:"아이코닉 목동 924회 2필지 복합시설 개발사업 견본주택 신축공사",d:"2026-03-06",p:"주식회사 아이코닉",g:"원도급"},
+    {n:"용인 양지 서희스타힐스 견본주택 보수공사",d:"2026-02-19",p:"양지지구2블럭지역주택조합",g:"원도급"},
+    {n:"반포주공1단지(1,2,4주구) 주택재건축정비사업중 모델하우스 건립",d:"2026-02-09",p:"반포주공1단지주택재건축정비사업조합",g:"하도급"},
+    {n:"부산 사직 1-6지구 재건축정비사업중 MH수정공사",d:"2026-02-09",p:"사직 1-6지구 재건축정비사업 조합",g:"하도급"},
+    {n:"강촌사업본부 골프장 여자사우나 락카 개선공사",d:"2026-01-19",p:"지에스건설 주식회사",g:"원도급"}
+  ]},
+  {name:"두양건축㈜",rep:"박해수, 조성복",list:[
+    {n:"SKT/26년 Next BSS구축 (NOVA) 사무공간 인테리어 공사",d:"2026-05-22",p:"SK㈜",g:"원도급"},
+    {n:"에스케이에코플랜트 영등포 오피스 개발사업 중 신사옥 인테리어 공사",d:"2026-05-11",p:"에스케이에코플랜트㈜",g:"원도급"},
+    {n:"에스케이에코플랜트 영등포 오피스 개발사업중 공용부인테리어공사",d:"2026-05-11",p:"흥국생명보험주식회사",g:"하도급"},
+    {n:"메트라이프 한국 본사 이전 프로젝트 공사 계약",d:"2026-05-11",p:"메트라이프생명보험㈜",g:"원도급"},
+    {n:"본사 2관 1층 the BOX 리뉴얼 인테리어 공사",d:"2026-04-30",p:"현대카드㈜",g:"원도급"},
+    {n:"[용인 SK아카데미] 행복관 환경개선 리모델링 공사",d:"2026-04-30",p:"에스케이하이닉스㈜",g:"원도급"},
+    {n:"현대) 양재사옥 서관 5층 스마트오피스 인테리어 공사",d:"2026-04-22",p:"현대자동차㈜",g:"원도급"},
+    {n:"인천공항점 DF2 & DF7 파사드 및 사이니지 공사",d:"2026-04-20",p:"주식회사 현대디에프",g:"원도급"},
+    {n:"무신사-29CM HOME 성수 2호점 인테리어 공사",d:"2026-04-17",p:"(주)무신사",g:"원도급"},
+    {n:"무신사 이구홈 서울숲 인테리어 공사",d:"2026-04-13",p:"(주)무신사",g:"원도급"}
+  ]},
+  {name:"신홍선건설㈜",rep:"이창현",list:[
+    {n:"(가칭)미래융합체험교육원 건립공사(계속비공사)",d:"2026-04-06",p:"충청북도교육청",g:"원도급"},
+    {n:"(가칭)미래융합체험교육원 건립공사(계속비공사)",d:"2026-04-06",p:"충청북도교육청",g:"원도급"},
+    {n:"구리고 내진보강 및 환경개선공사(계속비)",d:"2025-12-26",p:"경기도교육청 경기도구리남양주교육지원청",g:"원도급"},
+    {n:"의정부시 망월로 걷고 싶은 거리 조성공사",d:"2025-08-13",p:"경기도 의정부시",g:"원도급"},
+    {n:"호평체육문화센터 화재 복구 공사",d:"2025-04-24",p:"남양주도시공사",g:"원도급"},
+    {n:"제일평화시장 보수공사",d:"2025-04-21",p:"㈜공드게이트씨앤씨",g:"원도급"},
+    {n:"경부선 363.9km(부산) 방음시설 설치공사(2차)",d:"2024-01-10",p:"한국도로공사 서울경기본부",g:"원도급"},
+    {n:"경부선 363.9km(부산) 방음시설 설치공사(1차)",d:"2023-07-04",p:"한국도로공사 서울경기본부",g:"원도급"},
+    {n:"2021 상용차용 수소충전소 건설공사(안산본오)중 토목건축 하도급공사",d:"2023-02-02",p:"코하이젠 주식회사",g:"하도급"},
+    {n:"가평산속요양병원 신축공사외 다가구주택2건",d:"2022-12-15",p:"권혁운, 권정아",g:"원도급"}
+  ]},
+  {name:"강남건영㈜",rep:"김동우",list:[
+    {n:"제트로지스 이천시 고백리 상온 물류센터 신축공사중 PC공사",d:"2025-09-15",p:"제트로지스㈜",g:"하도급"},
+    {n:"강남구 역삼동 업무시설 신축공사",d:"2025-09-12",p:"주식회사 레그넘",g:"원도급"},
+    {n:"경마빌딩 신축공사",d:"2025-07-22",p:"경마빌딩㈜",g:"원도급"},
+    {n:"인천광역시 당하동 1029-5, 10번지 근린생활시설 신축공사",d:"2025-04-28",p:"센타프라자",g:"원도급"},
+    {n:"인천광역시 원당동 1018-1번지 근린생활시설 신축공사",d:"2025-04-28",p:"주식회사 아리울",g:"원도급"},
+    {n:"(주)미르기술 공장 증축공사중 PC공사",d:"2025-03-17",p:"주식회사 미르기술",g:"하도급"},
+    {n:"(주)지엘 안성시 죽산면 냉장,냉동 물류센터 신축공사중 PC공사",d:"2025-02-14",p:"주식회사 지엘",g:"하도급"},
+    {n:"평택공장 위험물 옥내저장소 신축공사",d:"2024-07-03",p:"강남화성㈜",g:"원도급"},
+    {n:"신길동 1300번지 역세권 청년주택 신축공사",d:"2024-06-20",p:"정오개발㈜",g:"원도급"},
+    {n:"김해대동첨단일반산업단지 A44블럭 물류창고 신축현장중 PC공사",d:"2024-03-29",p:"김해대동물류 주식회사",g:"하도급"}
+  ]},
+  {name:"아벤종합건설㈜",rep:"박윤이",list:[
+    {n:"에스티젠바이오 송도 1층 카페 인테리어 공사",d:"2026-04-29",p:"에스티젠바이오 주식회사",g:"원도급"},
+    {n:"에스티젠바이오 송도 1층 로비 인테리어 공사",d:"2026-04-29",p:"에스티젠바이오 주식회사",g:"원도급"},
+    {n:"시화캠퍼스 정기유지보수",d:"2026-04-08",p:"에스티팜 주식회사 반월공장",g:"원도급"},
+    {n:"이든파마 진천공장 공장동 및 사무동 증축공사",d:"2026-03-26",p:"(주)이든파마",g:"원도급"},
+    {n:"영남 1권역 외부 임차 사무실 레이아웃 공사",d:"2026-03-24",p:"동아에스티㈜",g:"원도급"},
+    {n:"송도캠퍼스 식당 리모델링 공사",d:"2026-03-01",p:"동아에스티㈜",g:"원도급"},
+    {n:"송도캠퍼스 식당 리모델링 공사중 주방기기 공사",d:"2026-03-01",p:"동아에스티㈜",g:"하도급"},
+    {n:"반월캠퍼스 유지보수 공사",d:"2026-02-26",p:"에스티팜 주식회사 반월공장",g:"원도급"},
+    {n:"본사 건물별 CI 옥외 설치 공사",d:"2026-02-20",p:"동아에스티㈜",g:"원도급"},
+    {n:"서울 1,2지점 외부 임차 사무실 레이아웃 공사",d:"2026-02-06",p:"동아에스티㈜",g:"원도급"}
+  ]},
+  {name:"에스지씨이앤씨㈜",rep:"이창모, 이우성",list:[
+    {n:"울산도시철도 1호선 건설공사",d:"2026-04-20",p:"울산광역시",g:"원도급"},
+    {n:"양평군 양근천, 강하 오수관로 정비 및 불명수 저감",d:"2026-04-06",p:"한국환경공단",g:"원도급"},
+    {n:"P6 프로젝트 OI센터 신축공사",d:"2026-03-31",p:"삼성바이오로직스 주식회사",g:"원도급"},
+    {n:"마석우리 지역주택조합 공동주택 신축공사",d:"2026-03-17",p:"마석우리 지역주택조합",g:"원도급"},
+    {n:"마석우리2 지역주택조합 신축공사 현장",d:"2026-03-17",p:"마석우리2지역주택조합",g:"원도급"},
+    {n:"마석우3지구 도시계획시설(기반시설) 개설공사",d:"2026-03-17",p:"마석우리 지역주택조합",g:"원도급"},
+    {n:"개정분구 하수관거 정비공사(4차분)",d:"2026-02-20",p:"전북특별자치도 군산시 기후환경국",g:"원도급"},
+    {n:"동해안변환소(#2) AC배후계통연결전력구공사(신한울3&4호기용)",d:"2026-02-19",p:"한국전력공사",g:"원도급"},
+    {n:"진두항 건설공사(3차)",d:"2026-01-16",p:"해양수산부 인천지방해양수산청",g:"원도급"},
+    {n:"창원파티마병원 증축 및 리모델링공사",d:"2026-01-09",p:"창원파티마병원",g:"원도급"}
+  ]},
+  {name:"에쓰와이이앤씨㈜",rep:"안희정",list:[
+    {n:"평택화양지구 2-2BL 세영리첼 아파트 신축공사",d:"2026-05-29",p:"에쓰와이이앤씨㈜",g:"원도급"},
+    {n:"안동 동천도로 선형개량공사(1차)",d:"2026-05-07",p:"경상북도 북부건설사업소",g:"원도급"},
+    {n:"영동고속도로 마성IC본선교(강릉) 개축공사(3차)",d:"2026-01-07",p:"한국도로공사 서울경기본부",g:"원도급"},
+    {n:"안동 송현동 세영리첼 공동주택 신축공사",d:"2025-10-01",p:"주식회사 삼태사",g:"원도급"},
+    {n:"강변사정동 지역주택조합 아파트 신축공사",d:"2025-07-02",p:"강변사정동지역주택조합",g:"원도급"},
+    {n:"24-F-00부대 이글루형 신축 시설공사(4160)중 골조공사",d:"2025-06-30",p:"국방시설본부 충청시설단",g:"하도급"},
+    {n:"명일동 305-51 근린생활시설 신축공사",d:"2025-05-16",p:"세영기획(명일)",g:"원도급"},
+    {n:"24-F-00부대 이글루형 신축 시설공사(4160)",d:"2024-12-10",p:"국방부 국군재정관리단",g:"원도급"},
+    {n:"안동 리첼호텔 리모델링 공사",d:"2024-02-06",p:"주식회사 아르피나",g:"원도급"},
+    {n:"강남서초-1 임대아파트 시설물 유지보수공사",d:"2023-03-23",p:"서울주택도시공사",g:"원도급"}
+  ]},
+  {name:"이화공영㈜",rep:"한주희",list:[
+    {n:"2호선 군자차량기지 하수관로 개량공사",d:"2026-03-26",p:"서울교통공사",g:"원도급"},
+    {n:"2026년 근린공원 유지관리 공사",d:"2026-03-10",p:"서울특별시 강동구",g:"원도급"},
+    {n:"고속국도 제255호선 강진~광주간 건설공사(제1공구",d:"2026-01-19",p:"한국도로공사 강진광주건설사업단",g:"원도급"},
+    {n:"영동대로 지하공간 복합개발 3공구 건설공사(토목)",d:"2025-12-30",p:"서울특별시 도시기반시설본부",g:"원도급"},
+    {n:"파주 운정 공중보행교 건설공사중 가설휀스공사",d:"2025-08-20",p:"하율디앤씨 주식회사",g:"하도급"},
+    {n:"2025년 어린이공원, 소공원 유지관리 공사",d:"2025-03-18",p:"서울특별시 강동구",g:"원도급"},
+    {n:"안법지구 하천재해예방사업",d:"2025-03-07",p:"경상남도",g:"원도급"},
+    {n:"파주 운정 공중보행교 건설공사",d:"2025-03-07",p:"하율디앤씨 주식회사",g:"원도급"},
+    {n:"연성대학교 신축공사 중 건축공사(토목,건축,기계,조경)",d:"2025-02-04",p:"연성대학교",g:"원도급"},
+    {n:"(주)시지메드텍 D동 증축공사 중 건축공사",d:"2025-01-23",p:"주식회사 시지메드텍",g:"원도급"}
+  ]},
+  {name:"㈜국보디자인",rep:"황찬연, 김민기",list:[
+    {n:"동대문 종합시장 1층 A,C동 리모델링 공사(인테리어)",d:"2026-05-29",p:"(주)동승",g:"원도급"},
+    {n:"동대문 종합시장 1층 A,C동 리모델링 공사(대수선)",d:"2026-05-29",p:"(주)동승",g:"원도급"},
+    {n:"AutoLand 화성 기아 LW 프로젝트중 인테리어공사(통합식당)",d:"2026-05-26",p:"기아㈜",g:"하도급"},
+    {n:"웨스틴 프로젝트 인테리어(1공구)",d:"2026-05-22",p:"파르나스호텔 주식회사",g:"원도급"},
+    {n:"S프로젝트중 인테리어(2차)공사",d:"2026-05-22",p:"에이치엠지에스 유한회사",g:"하도급"},
+    {n:"역삼빌딩 증축 및 대수선공사-건축공사",d:"2026-05-19",p:"주식회사 제이제이리얼티",g:"원도급"},
+    {n:"청담 이성빌딩 증축 및 대수선공사-건축공사",d:"2026-05-19",p:"주식회사 제이제이리얼티",g:"원도급"},
+    {n:"역삼빌딩 증축 및 대수선공사",d:"2026-05-19",p:"주식회사 제이제이리얼티",g:"원도급"},
+    {n:"청담 이성빌딩 증축 및 대수선공사",d:"2026-05-19",p:"주식회사 제이제이리얼티",g:"원도급"},
+    {n:"KCC 중앙연구소 종합연구동 휴게공간 제작",d:"2026-05-14",p:"(주)케이씨씨",g:"원도급"}
+  ]},
+  {name:"㈜다원앤컴퍼니",rep:"조서윤, 이태일",list:[
+    {n:"현대무브㈜ 의왕사업장 구축(인테리어)",d:"2026-06-05",p:"현대무브㈜",g:"원도급"},
+    {n:"서소문사옥 1차(3,5,10층) 실내환경개선공사",d:"2026-05-29",p:"(주)대한항공",g:"원도급"},
+    {n:"웨스틴 프로젝트 인테리어(4공구)",d:"2026-05-23",p:"파르나스호텔㈜",g:"원도급"},
+    {n:"제네시스 강남 노후화 개선 공사중 인테리어공사",d:"2026-05-14",p:"현대자동차㈜",g:"하도급"},
+    {n:"씨퓨처 업무공간 리뉴얼",d:"2026-05-11",p:"(주)씨퓨처",g:"원도급"},
+    {n:"[상암사옥] 2차 리모델링공사(강당, 2층 세미나실 외)_인테리어,기계",d:"2026-05-04",p:"(주)엘지유플러스",g:"원도급"},
+    {n:"OZ타운 안전운항동 GICC구축공사(건축,기계,전기,AV)",d:"2026-04-30",p:"(주)대한항공",g:"원도급"},
+    {n:"INTEIOR FIT OUT PACKAGE FOR KR-SEO-GFC",d:"2026-04-16",p:"구글코리아(유)",g:"원도급"},
+    {n:"그랜드하얏트인천 직원 락커룸 신설공사",d:"2026-04-07",p:"(주)칼호텔네트워크",g:"원도급"},
+    {n:"쿠팡 사옥 이전 프로젝트 KT Songpa 실내건축 및 대수선공사",d:"2026-04-02",p:"쿠팡㈜",g:"원도급"}
+  ]},
+  {name:"주식회사 신세계토건",rep:"김준한, 김성주",list:[
+    {n:"과천선 과천 등 2개역사 시설개량공사",d:"2026-05-06",p:"국가철도공단",g:"원도급"},
+    {n:"경인선 부개급전구분소 등 5개소 신축 및 개량공사",d:"2026-04-03",p:"국가철도공단",g:"원도급"},
+    {n:"분당선 서현 등 4개 역사 시설개량공사",d:"2026-01-08",p:"국가철도공단",g:"원도급"},
+    {n:"가족 아트캠핑 평화빌리지 조성공사",d:"2025-12-04",p:"경기도 파주시",g:"원도급"},
+    {n:"수색점 테넌트 입점 조성공사",d:"2025-12-03",p:"주식회사 이마트",g:"원도급"},
+    {n:"호남선 일로역 등 2개역 이동편의시설 확충 등 시설",d:"2025-10-15",p:"국가철도공단",g:"원도급"},
+    {n:"호남고속철도 광주송정역사 증축공사",d:"2025-10-01",p:"국가철도공단",g:"원도급"},
+    {n:"대설 피해 안성시족구전용구장 복구공사",d:"2025-06-20",p:"경기도 안성시",g:"원도급"},
+    {n:"일산선 지축 외 2개 역사 시설개량공사",d:"2025-04-22",p:"국가철도공단",g:"원도급"},
+    {n:"분당선 선릉 외 1개 역사 시설개량공사",d:"2025-04-09",p:"국가철도공단",g:"원도급"}
+  ]},
+  {name:"㈜은민에스엔디",rep:"이승성, 정태용, 이상민",list:[
+    {n:"OLD코스 15호 중간휴게소(그늘집) 리모델링 공사",d:"2026-05-14",p:"한양컨트리클럽",g:"원도급"},
+    {n:"동대문종합시장 지하 리뉴얼 공사 (6구역)",d:"2026-05-12",p:"동승",g:"원도급"},
+    {n:"삼성동63-6 단독주택 신축공사중 인테리어 공사",d:"2026-05-06",p:"공병학",g:"하도급"},
+    {n:"주한교황청대사관 신축공사중 내부마감공사 및 제작가구 설치",d:"2026-04-28",p:"주한교황청대사관",g:"하도급"},
+    {n:"증산도 상생역사문화 교육원 신축공사중 인테리어공사(공연장 및 대강당)",d:"2026-03-30",p:"재단법인 증산도유지재단",g:"하도급"},
+    {n:"여의도 오피스텔(임대주택) 개발사업 건설공사중 인테리어공사",d:"2026-03-18",p:"이지스제395호전문투자형사모부동산투자",g:"하도급"},
+    {n:"서초 헌인마을 도시개발사업중 인테리어공사(3공구)",d:"2026-03-16",p:"(주)한국토지신탁",g:"하도급"},
+    {n:"싸토리우스 송도캠퍼스 인테리어공사",d:"2023-03-16",p:"싸토리우스코리아오퍼레이션스 유한회사",g:"원도급"},
+    {n:"로즈우드 서울 객실,공용부 인테리어공사 (6공구)",d:"2026-03-04",p:"용산일레븐 주식회사",g:"원도급"},
+    {n:"평택고덕36BL 견본주택 신축공사",d:"2026-02-23",p:"우미건설",g:"원도급"}
+  ]},
+  {name:"㈜이웨이",rep:"이성구",list:[
+    {n:"L7 광명 리브랜딩 인테리어공사",d:"2026-05-27",p:"(주)티와이제일호기업구조조정부동산투자",g:"원도급"},
+    {n:"[노블라이프] R&D센터 조성 공사件",d:"2026-05-06",p:"삼성노블라이프㈜",g:"원도급"},
+    {n:"가회동 단독주택 리모델링 공사 중 가전 및 주방기기공사",d:"2026-05-01",p:"김재호",g:"원도급"},
+    {n:"도시정비사업팀 남부사업소 목동6단지 공식 홍보관 인테리어",d:"2026-04-21",p:"디엘이앤씨㈜",g:"원도급"},
+    {n:"메이필드호텔 스포츠동 사우나 및 수영장 환경개선공사",d:"2026-04-07",p:"정림개발㈜",g:"원도급"},
+    {n:"GFC_CAPEX_2025_TW B1 Retail Mall Entrance",d:"2026-03-20",p:"Gangnam Finance Center",g:"원도급"},
+    {n:"가회동 단독주택 리모델링 공사 중 가구공사",d:"2026-03-17",p:"김재호",g:"원도급"},
+    {n:"경제형 E-pit EVC(캐노피) 사업",d:"2026-03-09",p:"현대엔지니어링㈜",g:"원도급"},
+    {n:"율동공원 라폴리움 301",d:"2026-03-04",p:"김인",g:"원도급"},
+    {n:"가회동 단독주택 리모델링 공사 중 조명공사",d:"2026-01-30",p:"김재호",g:"원도급"}
+  ]},
+  {name:"진산건설㈜",rep:"강석원",list:[
+    {n:"154KV 학운변전소 토건공사",d:"2026-05-08",p:"한국전력공사 경인건설본부",g:"원도급"},
+    {n:"이매1동 복합청사 신축공사",d:"2026-03-11",p:"경기도 성남시",g:"원도급"},
+    {n:"마장축산물시장 시장정비사업 신축공사",d:"2025-12-29",p:"주식회사시장법인서울마켓",g:"원도급"},
+    {n:"광동중학교 내진보강 및 외벽개선공사",d:"2025-12-02",p:"경기도교육청 경기도구리남양주교육지원청",g:"원도급"},
+    {n:"제천고 그린스마트스쿨 조성 공사",d:"2025-11-24",p:"충청북도교육청 충청북도제천교육지원청",g:"원도급"},
+    {n:"용인고 본관(A동) 내진보강공사(계속비)",d:"2025-11-20",p:"경기도교육청",g:"원도급"},
+    {n:"광동중학교 장애인승강기설치(증축) 공사",d:"2025-10-24",p:"경기도교육청 경기도구리남양주교육지원청",g:"원도급"},
+    {n:"옛 도청 사회혁신공간 조성 건축 기계 공사",d:"2025-09-22",p:"(재)경기문화재단 인계동사무소",g:"원도급"},
+    {n:"25-M-토목시설 개선공사",d:"2025-08-27",p:"제 2해병사단",g:"원도급"},
+    {n:"안양천 지방하천 정비사업",d:"2025-02-20",p:"경기도 의왕시",g:"원도급"}
+  ]},
+  {name:"테크로스워터앤에너지",rep:"윤혁노, 이중희",list:[
+    {n:"수처리운영팀 Decanter EPC Package 구매",d:"2026-05-14",p:"지에스칼텍스",g:"원도급"},
+    {n:"대포지구 농어촌마을하수도 증설사업 3차분",d:"2026-05-11",p:"경상남도 산청군",g:"원도급"},
+    {n:"SK hynix 청주 SEC WWT MBR CIP 설비개선공사",d:"2026-04-30",p:"에스케이하이닉스 주식회사",g:"원도급"},
+    {n:"청정수소 생산 실증 연구시설 기반 구축공사",d:"2026-04-27",p:"한국수력원자력㈜",g:"원도급"},
+    {n:"용인 Cluster 1기 Ph-1 IBL CUB중 냉각탑 Drain",d:"2026-04-06",p:"에스케이하이닉스㈜",g:"하도급"},
+    {n:"호남부산2 농어촌마을 하수도 정비사업(토목,건축,기계)",d:"2026-03-17",p:"경상북도 영천시 환경사업소",g:"원도급"},
+    {n:"원전연계 저온수전해 실증시설 토목 및 배관공사",d:"2026-03-06",p:"현대건설 주식회사",g:"원도급"},
+    {n:"중화조 설비개선 및 자동화 설비 설치",d:"2026-02-24",p:"한화에어로스페이스㈜",g:"원도급"},
+    {n:"김포시 통진레코파크 증설사업",d:"2026-01-07",p:"한국환경공단",g:"원도급"},
+    {n:"원자력 청정수소 수전해건물 건축/기계공사",d:"2025-12-24",p:"삼성물산주식회사",g:"원도급"}
+  ]},
+  {name:"가안파트너스㈜",rep:"최영환",list:[
+    {n:"중흥그룹 서울사무소 인테리어공사",d:"2026-05-02",p:"중흥토건㈜",g:"원도급"},
+    {n:"안강레전드GC 증축공사중 인테리어공사",d:"2026-04-10",p:"옥산개발㈜",g:"하도급"},
+    {n:"천안시 서북구 성정동 212-1외 주상복합 홍보관(모델하우스)건립공사",d:"2026-04-03",p:"주식회사 성산개발",g:"원도급"},
+    {n:"진주 이현 1-5구역 재건축 신축공사중 견본주택공사",d:"2026-03-27",p:"이현 1-5구역 재건축정비사업조합",g:"하도급"},
+    {n:"거제시 장평동 견본주택 건립공사",d:"2026-02-25",p:"(주)제이씨산업개발",g:"원도급"},
+    {n:"견본주택리모델링공사(서한남양주진접)",d:"2026-02-10",p:"(주)서한",g:"원도급"},
+    {n:"고양장항지구M-1플록 주상복합 홍보관인테리어공사",d:"2026-02-09",p:"(주)반도건설",g:"원도급"},
+    {n:"흑석11재정비촉진구역재개발정비사업중 견본주택 건립공사",d:"2026-01-12",p:"흑석11재정비촉진구역재개발정비사업조합",g:"하도급"},
+    {n:"비스타 피트니스 환경 개선 공사(건축)",d:"2026-01-02",p:"sk네트웍스㈜",g:"원도급"},
+    {n:"천안청당1 견본주택 리모델링",d:"2026-01-02",p:"청암프로젝트㈜",g:"원도급"}
+  ]},
+  {name:"신한종합건설㈜",rep:"박용수",list:[
+    {n:"제주 4.3평화공원 활성화사업",d:"2026-04-10",p:"제주특별자치도",g:"원도급"},
+    {n:"성남신촌 공공주택지구 조경공사",d:"2026-03-09",p:"한국토지주택공사 경기남부지역본부",g:"원도급"},
+    {n:"현곡 소현처리분구 하수관로 정비사업(토목 및 기계)",d:"2025-02-26",p:"경상북도 경주시 맑은물사업본부",g:"원도급"},
+    {n:"밀양강 중도지구 하천환경정비사업",d:"2026-01-30",p:"기후에너지환경부 낙동강유역환경청",g:"원도급"},
+    {n:"고모~무봉간 상수관로 이설공사",d:"2025-05-22",p:"경기도 포천시 안전도시국 상하수과",g:"원도급"},
+    {n:"인덕원~동탄 복선전철 제2공구 노반신설 기타공사",d:"2025-05-19",p:"국가철도공단 수도권지역본부",g:"원도급"},
+    {n:"동해시 하수관로 정비사업(송정,부곡,북평분구)",d:"2025-02-03",p:"강원특별자치도 동해시 상하수도사업소",g:"원도급"},
+    {n:"안동-영덕 국도건설공사",d:"2025-01-31",p:"국토교통부 부산지방국토관리청",g:"원도급"},
+    {n:"평촌 자연재해위험개선지구 정비사업",d:"2025-01-22",p:"경상남도 의령군",g:"원도급"},
+    {n:"고속국도 제29호선 안성~성남간 건설공사(제7공구)",d:"2025-01-06",p:"한국도로공사세종천안건설사업단",g:"원도급"}
+  ]},
+  {name:"원전종합건설",rep:"김창기, 김남균",list:[
+    {n:"[투자]라풀렌 제조구역 레이아웃 변경공사 및 유틸리티 공사-건축기계공사",d:"2026-06-02",p:"(주)삼양바이오팜",g:"원도급"},
+    {n:"청주공장 Capa Up 3파트 포카칩라인 증설 건축 판넬공사",d:"2026-05-20",p:"(주)오리온",g:"원도급"},
+    {n:"[투자]1공장 제품창고 재축 건축공사",d:"2026-03-20",p:"(주)삼양패키징",g:"원도급"},
+    {n:"[청주공장] Capa Up 완제품 창고 증축공사",d:"2026-03-16",p:"(주)오리온",g:"원도급"},
+    {n:"2026년 건축시설물 유지보수공사(연간단가)",d:"2026-03-09",p:"서울특별시 물재생센터 중랑물재생센터",g:"원도급"},
+    {n:"[냉동생지 증설 투자] 건축기계공종 추가공사(설계 변경)의 건",d:"2026-02-01",p:"(주)삼양사",g:"원도급"},
+    {n:"[투자]라풀렌 증설에 따른 원자재창고 레이아웃 변경 및 철거 공사",d:"2025-12-16",p:"(주)삼양바이오팜",g:"원도급"},
+    {n:"[투자]ORC 파우더 지혈제 제조구역 레이아웃 공사 및 기계실 증축",d:"2025-12-16",p:"(주)삼양바이오팜",g:"원도급"},
+    {n:"스마트양식 클러스터 테스트베드 조성사업",d:"2025-12-12",p:"전라남도 신안군",g:"원도급"},
+    {n:"[금산공장] : KP A1008 1,2층 바닥 철판 설치 보완공사",d:"2025-12-04",p:"한국타이어앤테크놀로지㈜",g:"원도급"}
+  ]},
+  {name:"케이디종합건설㈜",rep:"백승묵",list:[
+    {n:"26-00대대 배수로 및 출입구 개선공사",d:"2026-05-12",p:"국방부 해군재경근무지원단",g:"원도급"},
+    {n:"구로1-1 소구역 하수관로 정비공사(1권역)-장기계속",d:"2025-02-25",p:"서울특별시 구로구",g:"원도급"},
+    {n:"2026년 도로시설물 일상유지보수공사 (터널,복개,지하차도)- 남부",d:"2026-01-12",p:"서울특별시 도로사업소 남부도로사업소",g:"원도급"},
+    {n:"개봉동 181-5 주변 사각형거(1련) 보수공사",d:"2025-12-12",p:"서울특별시 구로구",g:"원도급"},
+    {n:"답십리 17구역 인접 공공도로(전농로4길) 보완공사",d:"2025-08-04",p:"서울주택도시개발공사",g:"원도급"},
+    {n:"LHQ+ 서울서부1권 건설·매입임대주택 유지보수공사(건축)",d:"2025-02-18",p:"한국토지주택공사",g:"원도급"},
+    {n:"2025년 차집관로 시설물 유지보수공사(연간단가)",d:"2025-02-11",p:"서울특별시 물재생센터 중랑물재생센터",g:"원도급"},
+    {n:"(긴급)신림동 662-3 일원 외 2개소 사각형거 보수공사(3구간)",d:"2024-09-19",p:"서울특별시 관악구",g:"원도급"},
+    {n:"김포공항 항공유저장소 인입급수관 교체공사",d:"2024-07-12",p:"한국공항공사 김포공항",g:"원도급"},
+    {n:"울릉군 북면 나리 숙박시설 신축공사",d:"2024-05-10",p:"울릉담다",g:"원도급"}
+  ]},
+  {name:"범일건설㈜",rep:"설병덕",list:[
+    {n:"㈜빅솔 안산공장 증축공사",d:"2026-05-07",p:"(주)빅솔",g:"원도급"},
+    {n:"건축물 방수시설 (B동3층 기계실,B동1층 Air Compressor",d:"2026-03-31",p:"삼일제약㈜",g:"원도급"},
+    {n:"㈜파마코스텍 화성공장 증축공사",d:"2026-03-23",p:"㈜파마코스텍",g:"원도급"},
+    {n:"㈜노바렉스 오송 2공장 신축공사",d:"2026-03-18",p:"(주)노바렉스",g:"원도급"},
+    {n:"QC 시험실 및 보관소 리모델링 공사",d:"2025-09-08",p:"건일바이오팜㈜",g:"원도급"},
+    {n:"(주)유한양행 오송공장 신축공사",d:"2025-08-14",p:"(주)유한양행",g:"원도급"},
+    {n:"가칭 오룡고등학교 신축공사",d:"2025-06-30",p:"전라남도교육청",g:"원도급"},
+    {n:"구수산 스포츠센터 건립공사(건축)",d:"2025-06-05",p:"대구광역시 북구",g:"원도급"},
+    {n:"건축물 시설공사 (QA 사무실 시설)",d:"2025-04-30",p:"삼일제약㈜",g:"원도급"},
+    {n:"하나제약(주) 평택공장 주사제동 신축공사",d:"2025-04-23",p:"하나제약㈜",g:"원도급"}
+  ]},
+  {name:"명신건설",rep:"손형호, 손동우, 손동준",list:[
+    {n:"동아시아 인권과 평화미술관 건립공사(건축)",d:"2025-06-25",p:"전라남도 신안군",g:"원도급"},
+    {n:"부산강동 공공주택지구 조경공사",d:"2025-06-19",p:"한국토지주택공사 부산울산지역본부",g:"원도급"},
+    {n:"HAHA캠퍼스 체육시설 조성공사",d:"2024-12-26",p:"부산광역시 금정구",g:"원도급"},
+    {n:"고리2발 배후사면 보강공사",d:"2024-12-02",p:"한국수력원자력㈜",g:"원도급"},
+    {n:"수영S/S 석대D/L 불량 관로 및 케이블 복구 강관압입공사",d:"2024-09-05",p:"한국전력공사 부산울산지역본부",g:"원도급"},
+    {n:"천전개폐소 건설공사",d:"2024-08-28",p:"주식회사영덕제1풍력발전",g:"원도급"},
+    {n:"24년 간부식당 지붕방수 및 지반보강공사",d:"2024-03-27",p:"공군제5공중기동비행단",g:"원도급"},
+    {n:"경남청 의령경찰서 이전 신축 공사(건축, 기계)",d:"2024-03-27",p:"경찰청 경상남도경찰청",g:"원도급"},
+    {n:"부산동고등학교 체육관 보수 및 기타공사",d:"2024-02-27",p:"부산광역시교육청 부산동고등학교",g:"원도급"},
+    {n:"국립소방연구원 청사 이전 신축사업(건축공사)",d:"2023-12-15",p:"소방청 국립소방연구원",g:"원도급"}
+  ]},
+  {name:"㈜다우건축",rep:"권영욱",list:[
+    {n:"인스파이어 엔터테인먼트 리조트 사우나 크라이오테라피 설치공사",d:"2026-06-04",p:"(주)인스파이어인티그레이티드리조트",g:"원도급"},
+    {n:"서산테크노밸리 신규공사_인테리어공사",d:"2026-05-29",p:"(주)에스씨케이컴퍼니",g:"원도급"},
+    {n:"울산매곡 신규공사_인테리어공사",d:"2026-05-28",p:"(주)에스씨케이컴퍼니",g:"원도급"},
+    {n:"평택시청 신규 공사_인테리어공사",d:"2026-05-28",p:"(주)에스씨케이컴퍼니",g:"원도급"},
+    {n:"부평시장역 리뉴얼 Major공사_인테리어공사",d:"2026-05-27",p:"(주)에스씨케이컴퍼니",g:"원도급"},
+    {n:"마곡 원그로브 C동 10층 사무실 조성공사",d:"2026-05-19",p:"디엘에너지㈜",g:"원도급"},
+    {n:"이마트 군산점 리뉴얼공사",d:"2026-05-08",p:"(주)이마트",g:"원도급"},
+    {n:"양정역 신규공사_인테리어공사",d:"2026-04-30",p:"(주)에스씨케이컴퍼니",g:"원도급"},
+    {n:"FKI빌딩 사무실 조성공사(인테리어)",d:"2026-04-30",p:"미래에셋생명증권㈜",g:"원도급"},
+    {n:"월계점 SFM 리뉴얼공사",d:"2026-04-27",p:"(주)이마트",g:"원도급"}
+  ]},
+];
+
+const LS_KEY = 'kiscon_companies_v1';
+const LS_PROGRESS_KEY = 'kiscon_progress_v1';
+const LS_ADDED_KEY = 'kiscon_added_v1';
+const LS_WEEK_KEY = 'kiscon_week_v1';
+
+let COMPANIES = [];
+let selectedIdx = null;
+let doneSet = new Set();
+let allAdded = [];
+let currentWeek = '';
+
+/* ---------- 저장/로드 ---------- */
+function saveAll(){
+  localStorage.setItem(LS_KEY, JSON.stringify(COMPANIES));
+  localStorage.setItem(LS_PROGRESS_KEY, JSON.stringify([...doneSet]));
+  localStorage.setItem(LS_ADDED_KEY, JSON.stringify(allAdded));
+  localStorage.setItem(LS_WEEK_KEY, currentWeek);
+  flashSaved();
+}
+function flashSaved(){
+  const el = document.getElementById('saveStatus');
+  if(!el) return;
+  el.textContent = '✓ 저장됨 (' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) + ')';
+}
+function loadAll(){
+  const c = localStorage.getItem(LS_KEY);
+  COMPANIES = c ? JSON.parse(c) : JSON.parse(JSON.stringify(SEED_COMPANIES));
+  const p = localStorage.getItem(LS_PROGRESS_KEY);
+  doneSet = p ? new Set(JSON.parse(p)) : new Set();
+  const a = localStorage.getItem(LS_ADDED_KEY);
+  allAdded = a ? JSON.parse(a) : [];
+  currentWeek = localStorage.getItem(LS_WEEK_KEY) || getThisWeekLabel();
+}
+
+function getThisWeekLabel(){
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
+  return d.getFullYear() + '년 ' + week + '주차';
+}
+
+/* ---------- 매칭 로직 ---------- */
+function norm(s){ return s.replace(/\s+/g,' ').trim(); }
+function normKey(s){ return norm(s).toLowerCase().replace(/\/\d{5,}$/,'').trim(); }
+function matchNames(a, b){
+  const na = normKey(a), nb = normKey(b);
+  if(na === nb) return true;
+  const s = na.length <= nb.length ? na : nb;
+  const l = na.length <= nb.length ? nb : na;
+  return s.length >= 8 && l.includes(s.slice(0, Math.min(14, s.length)));
+}
+
+/* ---------- kiscon 파서 ----------
+   B행(날짜 포함)을 찾고 그 직전 행에서 공사명 추출 */
+function parseKiscon(raw){
+  const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  const lines = raw.split(/[\n\r]+/).map(l => l.trimEnd()).filter(l => l.trim());
+  const results = [];
+
+  for(let i = 0; i < lines.length; i++){
+    const cells = lines[i].split('\t').map(c => c.trim());
+    const dateIdx = cells.findIndex(c => dateRe.test(c));
+    if(dateIdx === -1) continue;
+
+    const date = cells[dateIdx];
+    const pub  = cells[dateIdx + 1] || '';
+
+    let projectName = '';
+    if(i > 0){
+      const prevCells = lines[i-1].split('\t').map(c => c.trim());
+      const skipWords = ['대표사','원도급','하도급','확인',''];
+      for(const cell of prevCells){
+        if(cell && !skipWords.includes(cell) && cell.length > 4){
+          projectName = cell.replace(/\/\d{5,}$/, '').trim();
+          break;
+        }
+      }
+    }
+    if(projectName.length > 3) results.push({ n: projectName, d: date, p: pub });
+  }
+  return results.slice(0, 20);
+}
+
+function showPreview(rows){
+  const box = document.getElementById('previewBox');
+  if(!rows.length){ box.className = 'preview-box'; return; }
+  box.className = 'preview-box show';
+  box.innerHTML =
+    `<span style="color:var(--gray-text3);font-size:11px">인식된 공사 ${rows.length}건</span><br>` +
+    rows.map((r,i) =>
+      `<span style="color:var(--gray-text2)">${i+1}.</span> ${r.n}` +
+      (r.d ? ` <span style="color:var(--blue);font-size:11px">(${r.d})</span>` : '') +
+      (r.p ? ` <span style="color:var(--gray-text3);font-size:11px">${r.p}</span>` : '')
+    ).join('<br>');
+}
+
+/* ---------- UI 빌드 ---------- */
+function updateProgress(){
+  const total = COMPANIES.length, done = doneSet.size;
+  document.getElementById('progTxt').textContent = done + '/' + total + ' 완료';
+  document.getElementById('progFill').style.width = (total ? Math.round(done/total*100) : 0) + '%';
+  document.getElementById('weekBadge').textContent = '📅 ' + currentWeek;
+}
+
+function buildGrid(){
+  const g = document.getElementById('companyGrid');
+  g.innerHTML = '';
+  COMPANIES.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = 'cb' + (selectedIdx === i ? ' active' : '');
+    const cnt = allAdded.filter(r => r.company === c.name).length;
+    const badge = doneSet.has(i)
+      ? `<span class="badge ${cnt ? 'badge-new' : 'badge-done'}">${cnt ? '+'+cnt : '완료'}</span>` : '';
+    b.innerHTML = `<div>${c.name}${badge}</div><div class="rep">${c.rep}</div>`;
+    b.onclick = () => selectCompany(i);
+    g.appendChild(b);
+  });
+  updateProgress();
+  updateReport();
+}
+
+function selectCompany(i){
+  selectedIdx = i;
+  buildGrid();
+  document.getElementById('inputSec').style.display = 'block';
+  document.getElementById('selName').textContent = COMPANIES[i].name + ' (' + COMPANIES[i].rep + ')';
+  document.getElementById('resultSec').style.display = 'none';
+  document.getElementById('pasteArea').value = '';
+  document.getElementById('previewBox').className = 'preview-box';
+  document.getElementById('inputSec').scrollIntoView({behavior:'smooth', block:'nearest'});
+  setTimeout(() => document.getElementById('pasteArea').focus(), 150);
+}
+
+function runCompare(){
+  if(selectedIdx === null) return;
+  const raw = document.getElementById('pasteArea').value.trim();
+  if(!raw){ alert('붙여넣기 내용이 없습니다.'); return; }
+  const newRows = parseKiscon(raw);
+  if(!newRows.length){ alert('공사명을 인식하지 못했습니다.\n붙여넣은 내용을 확인해 주세요.'); return; }
+
+  const c = COMPANIES[selectedIdx];
+  const added   = newRows.filter(nr => !c.list.some(o => matchNames(o.n, nr.n)));
+  const removed = c.list.filter(o  => !newRows.some(nr => matchNames(o.n, nr.n)));
+  const kept    = c.list.filter(o  =>  newRows.some(nr => matchNames(o.n, nr.n)));
+
+  // 기존 도급구분 보존을 위해 splice 전에 미리 저장
+  const prevGubunMap = {};
+  allAdded.forEach(x => { if(x.company === c.name) prevGubunMap[normKey(x.n)] = x.gubun; });
+
+  // 이 업체의 기존 보고 기록 제거 후 재기록
+  for(let i = allAdded.length - 1; i >= 0; i--)
+    if(allAdded[i].company === c.name) allAdded.splice(i, 1);
+
+  // 신규가 1건 이상 있으면 → 이 업체의 최신 10건 전체를 보고서에 포함 (신규는 isNew:true)
+  if(added.length > 0){
+    newRows.forEach(r => {
+      const isNew = added.some(a => matchNames(a.n, r.n));
+      // 우선순위: 1) 이전 보고서에서 사용자가 지정한 값  2) 시드/이전 비교 목록의 도급구분  3) 기본값 원도급
+      const oldMatch = c.list.find(o => matchNames(o.n, r.n));
+      const gubun = prevGubunMap[normKey(r.n)] || (oldMatch && oldMatch.g) || '원도급';
+      allAdded.push({ company: c.name, rep: c.rep, n: r.n, d: r.d, p: r.p, isNew, gubun });
+    });
+  }
+
+  COMPANIES[selectedIdx].list = newRows;
+  doneSet.add(selectedIdx);
+  saveAll();
+
+  document.getElementById('cntN').textContent = added.length;
+  document.getElementById('cntD').textContent = removed.length;
+  document.getElementById('cntK').textContent = kept.length;
+
+  let html = '<table><thead><tr><th>구분</th><th>공사명</th><th style="width:96px">계약일자</th><th>발주자</th></tr></thead><tbody>';
+  added.forEach(r   => { html += `<tr class="new-row"><td><span class="tag tag-new">★ 신규</span></td><td>${r.n}</td><td>${r.d}</td><td>${r.p}</td></tr>`; });
+  kept.forEach(o    => {
+    const nr = newRows.find(r => matchNames(o.n, r.n)) || o;
+    html += `<tr><td><span class="tag tag-keep">유지</span></td><td>${o.n}</td><td>${nr.d||o.d}</td><td>${nr.p||o.p}</td></tr>`;
+  });
+  removed.forEach(o => { html += `<tr class="del-row"><td><span class="tag tag-del">삭제</span></td><td>${o.n}</td><td>${o.d}</td><td>${o.p}</td></tr>`; });
+  html += '</tbody></table>';
+
+  document.getElementById('resultTbl').innerHTML = html;
+  document.getElementById('resultSec').style.display = 'block';
+  buildGrid();
+}
+
+function clearInput(){
+  document.getElementById('pasteArea').value = '';
+  document.getElementById('resultSec').style.display = 'none';
+  document.getElementById('previewBox').className = 'preview-box';
+}
+
+function showNext(){
+  if(selectedIdx === null) return;
+  selectCompany((selectedIdx + 1) % COMPANIES.length);
+}
+
+function updateReport(){
+  const total = allAdded.length;
+  const newCount = allAdded.filter(r => r.isNew).length;
+  const compCount = new Set(allAdded.map(r => r.company)).size;
+  document.getElementById('dlBtn').disabled = total === 0;
+  if(!total){
+    document.getElementById('reportSummary').style.display = 'none';
+    document.getElementById('reportTbl').innerHTML = '<div class="empty">신규 공사가 있는 업체의 전체 현황이 여기에 모입니다.</div>';
+    return;
+  }
+  document.getElementById('reportSummary').style.display = 'block';
+  document.getElementById('reportSummary').textContent = `${currentWeek} · 신규 공사 발생 업체 ${compCount}개 · 신규 ${newCount}건 / 전체 ${total}건`;
+
+  const byComp = {};
+  allAdded.forEach(r => { if(!byComp[r.company]) byComp[r.company] = []; byComp[r.company].push(r); });
+  let html = '<table><thead><tr><th>업체명</th><th>구분</th><th style="width:108px">도급구분</th><th>공사명</th><th style="width:96px">계약일자</th><th>발주자</th></tr></thead><tbody>';
+  let globalIdx = 0;
+  Object.entries(byComp).forEach(([comp, rows]) => {
+    rows.forEach((r, i) => {
+      const tag = r.isNew ? '<span class="tag tag-new">★ 신규</span>' : '<span class="tag tag-keep">기존</span>';
+      const gIdx = globalIdx++;
+      const toggle = `<div class="gubun-toggle">
+        <button class="${r.gubun==='원도급'?'on-원':''}" onclick="setGubun('${comp.replace(/'/g,"\\'")}', ${gIdx}, '원도급')">원도급</button>
+        <button class="${r.gubun==='하도급'?'on-하':''}" onclick="setGubun('${comp.replace(/'/g,"\\'")}', ${gIdx}, '하도급')">하도급</button>
+      </div>`;
+      html += `<tr class="${r.isNew?'new-row':''}" data-gidx="${gIdx}"><td>${i===0 ? comp : ''}</td><td>${tag}</td><td>${toggle}</td><td>${r.n}</td><td>${r.d}</td><td>${r.p}</td></tr>`;
+    });
+  });
+  html += '</tbody></table>';
+  document.getElementById('reportTbl').innerHTML = html;
+}
+
+function setGubun(company, gIdx, value){
+  // gIdx는 표시 순서 기준 — allAdded 내에서 같은 순서로 매칭
+  const rowsInOrder = [];
+  const byComp = {};
+  allAdded.forEach(r => { if(!byComp[r.company]) byComp[r.company] = []; byComp[r.company].push(r); });
+  Object.values(byComp).forEach(rows => rowsInOrder.push(...rows));
+  if(rowsInOrder[gIdx]){
+    rowsInOrder[gIdx].gubun = value;
+    saveAll();
+    updateReport();
+  }
+}
+
+async function downloadReport(){
+  if(!allAdded.length) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('신규공사현황');
+
+  const headers = ['업체명','구분','도급구분','공사명','원도급계약일자','발주자'];
+  const headerRow = ws.addRow(headers);
+  headerRow.font = { bold: true };
+  headerRow.eachCell(cell => {
+    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF1EFE8'} };
+    cell.border = { bottom: { style:'thin', color:{argb:'FFE5E3DD'} } };
+  });
+
+  const byComp = {};
+  allAdded.forEach(r => { if(!byComp[r.company]) byComp[r.company] = []; byComp[r.company].push(r); });
+
+  Object.entries(byComp).forEach(([comp, list]) => {
+    list.forEach((r, i) => {
+      const row = ws.addRow([i===0 ? comp : '', r.isNew ? '★신규' : '', r.gubun || '원도급', r.n, r.d, r.p]);
+      if(r.isNew){
+        row.eachCell(cell => {
+          cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFCE4E4'} };
+          cell.font = { color: { argb: 'FF9C2B2B' }, bold: true };
+        });
+      }
+      row.eachCell(cell => {
+        cell.border = { bottom: { style:'thin', color:{argb:'FFE5E3DD'} } };
+        cell.alignment = { vertical: 'middle', wrapText: false };
+      });
+    });
+  });
+
+  ws.columns = [
+    { width: 24 }, { width: 9 }, { width: 11 }, { width: 56 }, { width: 14 }, { width: 32 }
+  ];
+  ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `신규공사현황_${today}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ---------- 새 주차 시작 ---------- */
+function confirmResetWeek(){
+  showConfirm(
+    '새 주차 시작',
+    '이번 주 진행 상황(완료 표시, 신규 공사 목록)을 초기화합니다.\n각 업체의 최신 공사 목록(비교 기준)은 유지됩니다.\n계속하시겠습니까?',
+    () => {
+      doneSet = new Set();
+      allAdded = [];
+      currentWeek = getThisWeekLabel();
+      saveAll();
+      buildGrid();
+      document.getElementById('resultSec').style.display = 'none';
+      document.getElementById('inputSec').style.display = 'none';
+      selectedIdx = null;
+      closeConfirm();
+    }
+  );
+}
+
+/* ---------- 업체 관리 ---------- */
+function openManageModal(){
+  renderManageList();
+  document.getElementById('manageModal').classList.add('show');
+}
+function closeManageModal(){
+  document.getElementById('manageModal').classList.remove('show');
+  document.getElementById('newCompName').value = '';
+  document.getElementById('newCompRep').value = '';
+}
+function renderManageList(){
+  const el = document.getElementById('manageList');
+  el.innerHTML = COMPANIES.map((c,i) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-border)">
+      <div><strong>${c.name}</strong> <span style="color:var(--gray-text3);font-size:11px">${c.rep}</span></div>
+      <button class="act small outline-red" onclick="removeCompany(${i})">삭제</button>
+    </div>
+  `).join('');
+}
+function addCompany(){
+  const name = document.getElementById('newCompName').value.trim();
+  const rep = document.getElementById('newCompRep').value.trim();
+  if(!name){ alert('업체명을 입력해 주세요.'); return; }
+  COMPANIES.push({name, rep: rep||'-', list: []});
+  saveAll();
+  buildGrid();
+  renderManageList();
+  document.getElementById('newCompName').value = '';
+  document.getElementById('newCompRep').value = '';
+}
+function removeCompany(i){
+  showConfirm('업체 삭제', `"${COMPANIES[i].name}"을 목록에서 삭제합니다. 계속하시겠습니까?`, () => {
+    COMPANIES.splice(i,1);
+    doneSet = new Set([...doneSet].filter(x=>x!==i).map(x=>x>i?x-1:x));
+    saveAll();
+    buildGrid();
+    renderManageList();
+    closeConfirm();
+  });
+}
+
+/* ---------- 공용 확인 모달 ---------- */
+function showConfirm(title, msg, onConfirm){
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  const btn = document.getElementById('confirmBtn');
+  btn.onclick = onConfirm;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function closeConfirm(){
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+/* ---------- 백업/복원 ---------- */
+function exportBackup(){
+  const data = { COMPANIES, doneSet:[...doneSet], allAdded, currentWeek, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kiscon_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importBackup(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try{
+      const data = JSON.parse(e.target.result);
+      COMPANIES = data.COMPANIES || COMPANIES;
+      doneSet = new Set(data.doneSet || []);
+      allAdded = data.allAdded || [];
+      currentWeek = data.currentWeek || currentWeek;
+      saveAll();
+      buildGrid();
+      alert('백업 파일을 불러왔습니다.');
+    }catch(err){
+      alert('파일을 읽는 중 오류가 발생했습니다.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ---------- 초기화 ---------- */
+function init(){
+  loadAll();
+  buildGrid();
+  document.getElementById('pasteArea').addEventListener('input', function(){
+    showPreview(parseKiscon(this.value));
+  });
+}
+init();
+</script>
+</body>
+</html>
