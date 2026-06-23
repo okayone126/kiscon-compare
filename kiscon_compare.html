@@ -801,12 +801,17 @@ async function downloadReport(){
     list.forEach((r, i) => {
       const row = ws.addRow([i===0 ? comp : '', r.isNew ? '★신규' : '', r.gubun || '원도급', r.n, r.d, r.p]);
       row.eachCell((cell, colNum) => {
-        cell.font = { name: '맑은 고딕', size: 11, bold: !!r.isNew, color: r.isNew ? { argb: 'FF9C2B2B' } : undefined };
-        if(r.isNew){
+        const isCompanyCol = colNum === 1;
+        cell.font = { name: '맑은 고딕', size: 11, bold: (!!r.isNew && !isCompanyCol), color: (r.isNew && !isCompanyCol) ? { argb: 'FF9C2B2B' } : undefined };
+        if(r.isNew && !isCompanyCol){
           cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFCE4E4'} };
         }
         cell.border = fullBorder;
-        cell.alignment = { horizontal: (colNum===4||colNum===6) ? 'left' : 'center', vertical: 'middle' };
+        cell.alignment = {
+          horizontal: (colNum===4||colNum===6) ? 'left' : 'center',
+          vertical: 'middle',
+          shrinkToFit: colNum === 6
+        };
       });
       currentRowNum++;
     });
