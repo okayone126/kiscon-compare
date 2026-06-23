@@ -762,37 +762,65 @@ async function downloadReport(){
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('신규공사현황');
 
-  const headers = ['업체명','구분','도급구분','공사명','원도급계약일자','발주자'];
+  const thinBorder = { style: 'thin', color: { argb: 'FFB0AEA6' } };
+  const fullBorder = { top: thinBorder, bottom: thinBorder, left: thinBorder, right: thinBorder };
+
+  // 1행: 제목 (병합 + 큰 글씨)
+  ws.mergeCells('A1:F1');
+  const titleCell = ws.getCell('A1');
+  titleCell.value = '2026 도급업체 공사계약 현황';
+  titleCell.font = { name: '맑은 고딕', size: 25, bold: true };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(1).height = 37.5;
+
+  // 2행: 기준 날짜 (F열 우측 정렬)
+  ws.addRow([]);
+  const dateCell = ws.getCell('F2');
+  dateCell.value = `${today} 기준`;
+  dateCell.font = { name: '맑은 고딕', size: 11, bold: true };
+  dateCell.alignment = { horizontal: 'right' };
+
+  // 3행: 헤더
+  const headers = ['업체명','구분','도급\n구분','공사명','원도급\n계약일자','발주자'];
   const headerRow = ws.addRow(headers);
-  headerRow.font = { bold: true };
+  ws.getRow(3).height = 39.95;
   headerRow.eachCell(cell => {
+    cell.font = { name: '맑은 고딕', size: 11, bold: true };
     cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF1EFE8'} };
-    cell.border = { bottom: { style:'thin', color:{argb:'FFE5E3DD'} } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border = fullBorder;
   });
 
+  // 4행부터: 데이터
   const byComp = {};
   allAdded.forEach(r => { if(!byComp[r.company]) byComp[r.company] = []; byComp[r.company].push(r); });
 
+  let currentRowNum = 4; // 1=제목, 2=날짜, 3=헤더, 4부터 데이터
   Object.entries(byComp).forEach(([comp, list]) => {
+    const startRow = currentRowNum;
     list.forEach((r, i) => {
       const row = ws.addRow([i===0 ? comp : '', r.isNew ? '★신규' : '', r.gubun || '원도급', r.n, r.d, r.p]);
-      if(r.isNew){
-        row.eachCell(cell => {
+      row.eachCell((cell, colNum) => {
+        cell.font = { name: '맑은 고딕', size: 11, bold: !!r.isNew, color: r.isNew ? { argb: 'FF9C2B2B' } : undefined };
+        if(r.isNew){
           cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFCE4E4'} };
-          cell.font = { color: { argb: 'FF9C2B2B' }, bold: true };
-        });
-      }
-      row.eachCell(cell => {
-        cell.border = { bottom: { style:'thin', color:{argb:'FFE5E3DD'} } };
-        cell.alignment = { vertical: 'middle', wrapText: false };
+        }
+        cell.border = fullBorder;
+        cell.alignment = { horizontal: (colNum===4||colNum===6) ? 'left' : 'center', vertical: 'middle' };
       });
+      currentRowNum++;
     });
+    const endRow = currentRowNum - 1;
+    if(endRow > startRow){
+      ws.mergeCells(`A${startRow}:A${endRow}`);
+      ws.getCell(`A${startRow}`).alignment = { horizontal: 'center', vertical: 'middle' };
+    }
   });
 
   ws.columns = [
-    { width: 24 }, { width: 9 }, { width: 11 }, { width: 56 }, { width: 14 }, { width: 32 }
+    { width: 17.25 }, { width: 7.625 }, { width: 9 }, { width: 56 }, { width: 12.5 }, { width: 22.625 }
   ];
-  ws.views = [{ state: 'frozen', ySplit: 1 }];
+  ws.views = [{ state: 'frozen', ySplit: 3 }];
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], { type: 'application/octet-stream' });
